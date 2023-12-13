@@ -26,7 +26,7 @@ from pre_commit.homli.constants import GITHUB_DOTFILES_REPOSITORY
 logger = logging.getLogger(__name__)
 
 ##################################
-### Avlos installation scripts ###
+### HOMLI installation scripts ###
 ##################################
 def setup_homli() -> int:
     """
