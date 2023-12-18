@@ -5,7 +5,10 @@ import logging
 import os
 import sys
 from collections.abc import Sequence
-
+from typing import Any
+from typing import Optional
+from typing import Sequence
+from typing import Union
 import pre_commit.constants as C
 from pre_commit import clientlib
 from pre_commit import git
@@ -52,10 +55,34 @@ def _add_config_option(parser: argparse.ArgumentParser) -> None:
     )
 
 
+class AppendReplaceDefault(argparse.Action):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self.appended = False
+
+    def __call__(
+            self,
+            parser: argparse.ArgumentParser,
+            namespace: argparse.Namespace,
+            values: Union[str, Sequence[str], None],
+            option_string: Optional[str] = None,
+    ) -> None:
+        if not self.appended:
+            setattr(namespace, self.dest, [])
+            self.appended = True
+        getattr(namespace, self.dest).append(values)
+
+
 def _add_hook_type_option(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
-        '-t', '--hook-type',
-        choices=clientlib.HOOK_TYPES, action='append', dest='hook_types',
+        '-t', '--hook-type', choices=(
+            'pre-commit', 'pre-merge-commit', 'pre-push', 'prepare-commit-msg',
+            'commit-msg', 'post-commit', 'post-checkout', 'post-merge',
+            'post-rewrite',
+        ),
+        action=AppendReplaceDefault,
+        default=['pre-commit'],
+        dest='hook_types',
     )
 
 
